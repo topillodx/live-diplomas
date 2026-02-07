@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Evento</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;}
+
+body{
+  background:#f3f4f6 url('img/topillodx-logo.png') no-repeat bottom right;
+  background-size:60px;
+  min-height:100vh;
+  padding:20px;
+}
+
+/* ===== BANNER ===== */
+.banner{
+  width:100%;
+  height:240px;
+  background:#ddd center/cover no-repeat;
+  border-radius:16px;
+  margin-bottom:25px;
+  box-shadow:0 10px 25px rgba(0,0,0,.3);
+}
+
+/* ===== NAV ===== */
+nav{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:25px;
+}
+nav button{
+  padding:12px 26px;
+  border:none;
+  border-radius:12px;
+  font-size:1.05rem;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  box-shadow:0 6px 15px rgba(0,0,0,.3);
+  transition:.2s;
+}
+nav button:hover{
+  transform:translateY(-2px);
+}
+
+/* ===== TITULO EVENTO ===== */
+.event-title{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+#eventIndicativo{
+  display:block;
+  font-size:4rem;
+  font-weight:900;
+  background:linear-gradient(180deg,#22c55e,#4ade80);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:
+    3px 3px 0 #14532d,
+    6px 6px 0 rgba(0,0,0,.4);
+}
+
+#eventNombre{
+  display:block;
+  font-size:2.4rem;
+  font-weight:800;
+  background:linear-gradient(180deg,#facc15,#f97316);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:
+    2px 2px 0 #7c2d12,
+    4px 4px 0 rgba(0,0,0,.35);
+}
+
+/* ===== DIPLOMA ===== */
+.diploma-box{
+  display:flex;
+  justify-content:center;
+  margin-bottom:30px;
+}
+.diploma-box img{
+  max-width:650px;
+  width:100%;
+  border-radius:16px;
+  box-shadow:0 15px 35px rgba(0,0,0,.4);
+}
+
+/* ===== CONTENIDO ===== */
+.main{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:30px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  text-align:center;
+}
+.main p{
+  font-size:1.15rem;
+  color:#374151;
+  line-height:1.6;
+}
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner" id="eventBanner"></div>
+
+<!-- MENU -->
+<nav>
+  <button onclick="location.href='index.html'">INICIO</button>
+  <button onclick="location.href='bases.html'">BASES</button>
+  <button onclick="location.href='diplomas.html'">DIPLOMAS</button>
+  <button onclick="location.href='estadisticas.html'">RANKING</button>
+  <button onclick="location.href='admin.html'">ADMIN</button>
+</nav>
+
+<!-- TITULO EVENTO -->
+<h1 class="event-title">
+  <span id="eventIndicativo">EG7DA</span>
+  <span id="eventNombre">DÍA DE ANDALUCÍA</span>
+</h1>
+
+<!-- DIPLOMA -->
+<div class="diploma-box">
+  <img src="DIPLOMAS/R C SEVILLA.png" alt="Diploma del evento">
+</div>
+
+<!-- DESCRIPCIÓN -->
+<div class="main">
+  <p>
+    Bienvenido al evento especial.<br>
+    Participa realizando contactos y consigue tu diploma oficial.
+  </p>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyDuQKzyIl6nAqMb8eTcX-xLV_cKwCXIWbE",
+  authDomain:"liveqso-diplomas.firebaseapp.com",
+  databaseURL:"https://liveqso-diplomas-default-rtdb.firebaseio.com",
+  projectId:"liveqso-diplomas",
+  storageBucket:"liveqso-diplomas.firebasestorage.app",
+  messagingSenderId:"807864210448",
+  appId:"1:807864210448:web:daa27562a82646c4606695"
+});
+
+const db = firebase.database();
+
+/* CARGA EVENTO */
+db.ref("evento").on("value", snap=>{
+  if(!snap.exists()) return;
+  const e = snap.val();
+
+  if(e.indicativo){
+    eventIndicativo.textContent = e.indicativo;
+    document.title = e.indicativo;
+  }
+  if(e.nombre){
+    eventNombre.textContent = e.nombre;
+    document.title += " – " + e.nombre;
+  }
+  if(e.banner){
+    eventBanner.style.backgroundImage = `url(${e.banner})`;
+  }
+});
+</script>
+
+</body>
+</html>

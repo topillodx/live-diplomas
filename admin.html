@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Admin · Evento</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{
+  background:#f3f4f6 url('img/topillodx-LOGO.png') no-repeat bottom right;
+  background-size:60px;
+  min-height:100vh;
+  padding:20px;
+}
+.banner{
+  width:100%;
+  height:200px;
+  background:#ddd center/cover no-repeat;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+/* ===== NAV ===== */
+nav{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:25px;
+}
+nav button{
+  padding:12px 26px;
+  border:none;
+  border-radius:12px;
+  font-size:1.05rem;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  box-shadow:0 6px 15px rgba(0,0,0,.3);
+  transition:.2s;
+}
+nav button:hover{
+  transform:translateY(-2px);
+}
+.admin-login,.admin-panel{max-width:850px;margin:auto;}
+.admin-login{
+  display:flex;justify-content:center;align-items:center;min-height:60vh;
+}
+.login-card{
+  background:white;padding:30px;border-radius:14px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25);
+  width:100%;max-width:380px;text-align:center;
+}
+.login-card input, .login-card button{
+  width:100%;padding:12px;margin-bottom:12px;
+  border-radius:10px;border:1px solid #ccc;
+}
+.login-card button{
+  border:none;background:linear-gradient(135deg,#4ade80,#16a34a);
+  color:white;font-weight:bold;
+}
+.admin-panel{
+  display:none;background:white;padding:25px;border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.admin-panel h3{color:#16a34a;margin:15px 0 10px;}
+.admin-panel input, textarea{
+  width:100%;padding:10px;margin-bottom:10px;
+  border-radius:8px;border:1px solid #ccc;
+}
+.admin-panel button{
+  padding:10px;border:none;border-radius:8px;
+  background:linear-gradient(135deg,#4ade80,#16a34a);
+  color:white;font-weight:bold;cursor:pointer;
+}
+hr{margin:20px 0;border:none;border-top:1px solid #e5e7eb;}
+</style>
+</head>
+
+<body>
+
+<div class="banner" id="bannerPreview"></div>
+
+<nav>
+  <button onclick="location.href='index.html'">INICIO</button>
+  <button onclick="location.href='bases.html'">BASES</button>
+  <button onclick="location.href='diplomas.html'">DIPLOMAS</button>
+  <button onclick="location.href='estadisticas.html'">RANKING</button>
+  <button onclick="location.href='admin.html'">ADMIN</button>
+</nav>
+
+<!-- LOGIN -->
+<div class="admin-login" id="loginDiv">
+  <div class="login-card">
+    <h2>🔐 Panel Admin</h2>
+    <input type="email" id="adminEmail" placeholder="Email">
+    <input type="password" id="adminPass" placeholder="Contraseña">
+    <button onclick="loginUser()">Entrar</button>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div class="admin-panel" id="panelDiv">
+
+  <h3>Evento</h3>
+
+  <label>Indicativo</label>
+  <input type="text" id="eventIndicativo">
+
+  <label>Nombre del evento</label>
+  <input type="text" id="eventNombre">
+
+  <button onclick="saveEventName()">Guardar nombre del evento</button>
+
+  <hr>
+
+  <label>Banner (PNG / JPG)</label>
+  <input type="file" id="bannerFile" accept="image/*">
+  <button onclick="saveBanner()">Guardar banner</button>
+
+  <hr>
+
+  <h3>Subir ADIF</h3>
+  <input type="file" id="adifFile">
+  <button onclick="uploadADIF()">Subir ADIF</button>
+
+  <h3>Subir Diploma (PNG)</h3>
+  <input type="file" id="diplomaFile">
+  <button onclick="uploadDiploma()">Subir diploma</button>
+
+  <h3>Subir Bases (TXT)</h3>
+  <input type="file" id="basesFile">
+  <button onclick="uploadBases()">Subir bases</button>
+
+  <h3>Reglas del Evento (TXT)</h3>
+  <input type="file" id="rulesFile">
+  <button onclick="uploadRules()">Subir reglas</button>
+
+  <hr>
+
+  <h3>⚠️ Mantenimiento</h3>
+  <button onclick="clearADIF()">Borrar QSOs y Ranking</button>
+
+  <hr>
+  <button onclick="logout()">Salir</button>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyDuQKzyIl6nAqMb8eTcX-xLV_cKwCXIWbE",
+  authDomain:"liveqso-diplomas.firebaseapp.com",
+  databaseURL:"https://liveqso-diplomas-default-rtdb.firebaseio.com",
+  projectId:"liveqso-diplomas",
+  storageBucket:"liveqso-diplomas.firebasestorage.app",
+  messagingSenderId:"807864210448",
+  appId:"1:807864210448:web:daa27562a82646c4606695"
+});
+const auth=firebase.auth();
+const db=firebase.database();
+
+function loginUser(){
+  auth.signInWithEmailAndPassword(adminEmail.value,adminPass.value)
+    .catch(e=>alert(e.message));
+}
+function logout(){auth.signOut();}
+
+auth.onAuthStateChanged(u=>{
+  loginDiv.style.display=u?"none":"flex";
+  panelDiv.style.display=u?"block":"none";
+  if(u) loadEvent();
+});
+
+function loadEvent(){
+  db.ref("evento").once("value",s=>{
+    if(!s.exists())return;
+    const d=s.val();
+    eventIndicativo.value=d.indicativo||"";
+    eventNombre.value=d.nombre||"";
+    if(d.banner) bannerPreview.style.backgroundImage=`url(${d.banner})`;
+  });
+}
+
+function saveEventName(){
+  db.ref("evento").update({
+    indicativo:eventIndicativo.value.trim(),
+    nombre:eventNombre.value.trim()
+  }).then(()=>alert("✅ Evento actualizado"));
+}
+
+function saveBanner(){
+  const f=bannerFile.files[0];
+  if(!f) return alert("Selecciona imagen");
+  const r=new FileReader();
+  r.onload=e=>{
+    db.ref("evento/banner").set(e.target.result)
+      .then(()=>alert("✅ Banner actualizado"));
+  };
+  r.readAsDataURL(f);
+}
+
+function uploadBases(){uploadTXT("basesFile","bases/evento","Bases");}
+function uploadRules(){uploadTXT("rulesFile","reglas/evento","Reglas");}
+
+function uploadTXT(inputId,refPath,msg){
+  const f=document.getElementById(inputId).files[0];
+  if(!f) return alert("Selecciona archivo");
+  const r=new FileReader();
+  r.onload=e=>{
+    db.ref(refPath).set(e.target.result)
+      .then(()=>alert("✅ "+msg+" subidas"));
+  };
+  r.readAsText(f);
+}
+
+function uploadADIF(){alert("📡 ADIF conectado (tu lógica existente)");}
+function uploadDiploma(){alert("🖼 Diploma conectado (tu lógica existente)");}
+
+function clearADIF(){
+  if(!confirm("¿Borrar QSOs y ranking?")) return;
+  db.ref("qsos").remove();
+  db.ref("ranking").remove()
+    .then(()=>alert("✅ Datos borrados"));
+}
+</script>
+
+</body>
+</html>

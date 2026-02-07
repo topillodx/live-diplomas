@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>EG7DA – Ranking Profesional</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{background:#f3f4f6;min-height:100vh;padding:0}
+body{
+  background:#f3f4f6 url('img/topillodx-logo.png') no-repeat bottom right;
+  background-size:60px;
+  min-height:100vh;
+  padding:20px;
+}
+/* ===== BANNER ===== */
+.banner{
+  width:100%;
+  height:240px;
+  background:#ddd center/cover no-repeat;
+  border-radius:16px;
+  margin-bottom:25px;
+  box-shadow:0 10px 25px rgba(0,0,0,.3);
+}
+
+/* ===== NAV ===== */
+nav{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:10px 0 20px;
+  flex-wrap:wrap;
+}
+nav button{
+  padding:14px 28px;
+  font-size:1.1rem;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  background:linear-gradient(135deg,#4ade80,#16a34a);
+  color:white;
+  cursor:pointer;
+  transition:.2s;
+}
+nav button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 8px rgba(0,0,0,.3);
+}
+
+/* ===== CONTENEDOR ===== */
+.container{max-width:1300px;margin:auto;padding:10px}
+
+/* ===== ESTADISTICAS ===== */
+.stats{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin-bottom:30px;
+  flex-wrap:wrap;
+  text-align:center;
+}
+.stats div{
+  background:white;
+  padding:15px 25px;
+  border-radius:12px;
+  box-shadow:0 3px 6px rgba(0,0,0,.15);
+  font-size:1.2rem;
+  font-weight:bold;
+  min-width:140px;
+}
+.stats span{
+  display:block;
+  font-size:2.5rem;
+  color:#16a34a;
+}
+
+/* ===== HEADERS ===== */
+.top-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:5px;
+  flex-wrap:wrap;
+}
+.top-header div{
+  flex:1;
+  margin:0 5px;
+  text-align:center;
+  background:#16a34a;
+  color:white;
+  padding:10px 0;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+/* ===== COLUMNAS ===== */
+.top-columns{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+}
+.top-columns div{
+  flex:1;
+  margin:0 5px;
+  background:#e0e0e0;
+  padding:5px 0;
+  border-radius:6px;
+  display:flex;
+  justify-content:space-around;
+  font-weight:bold;
+}
+
+/* ===== LISTAS ===== */
+.top-lists{
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+.top-list{
+  flex:1;
+  background:white;
+  border-radius:8px;
+  padding:5px;
+  max-height:600px;
+  overflow-y:auto;
+}
+.top-list div{
+  display:flex;
+  justify-content:space-around;
+  padding:6px 10px;
+  border-bottom:1px solid #eee;
+  font-size:1.05rem;
+}
+.top1{background:linear-gradient(to right,#ffd700,#ffec8b);font-weight:bold}
+.top2{background:linear-gradient(to right,#c0c0c0,#e0e0e0);font-weight:bold}
+.top3{background:linear-gradient(to right,#cd7f32,#deb887);font-weight:bold;color:white}
+
+/* ===== FOOTER ===== */
+footer{
+  text-align:center;
+  color:white;
+  background:#182848;
+  padding:10px;
+  margin-top:20px;
+  font-size:.85rem;
+  font-weight:bold;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .top-lists,.top-header,.top-columns{flex-direction:column}
+  .top-header div,.top-columns div{margin:5px 0}
+}
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner" id="eventBanner"></div>
+
+<!-- NAV -->
+<nav>
+  <button onclick="location.href='index.html'">INICIO</button>
+  <button onclick="location.href='bases.html'">BASES</button>
+  <button onclick="location.href='diplomas.html'">DIPLOMAS</button>
+  <button onclick="location.href='estadisticas.html'">RANKING</button>
+  <button onclick="location.href='admin.html'">ADMIN</button>
+</nav>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div>QSOs<span id="totalQsos">0</span></div>
+    <div>Indicativos<span id="totalCalls">0</span></div>
+    <div>Prefijos<span id="totalPrefixes">0</span></div>
+  </div>
+
+  <!-- HEADERS -->
+  <div class="top-header">
+    <div>TOP 100 MIXTO</div>
+    <div>TOP 100 SSB</div>
+    <div>TOP 100 CW</div>
+    <div>TOP 100 MGM</div>
+  </div>
+
+  <!-- COLUMNAS -->
+  <div class="top-columns">
+    <div><span>#</span><span>Indicativo</span><span>Slots</span></div>
+    <div><span>#</span><span>Indicativo</span><span>Slots</span></div>
+    <div><span>#</span><span>Indicativo</span><span>Slots</span></div>
+    <div><span>#</span><span>Indicativo</span><span>Slots</span></div>
+  </div>
+
+  <!-- LISTAS -->
+  <div class="top-lists">
+    <div class="top-list" id="listGeneral"></div>
+    <div class="top-list" id="listSSB"></div>
+    <div class="top-list" id="listCW"></div>
+    <div class="top-list" id="listMGM"></div>
+  </div>
+</div>
+
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyDuQKzyIl6nAqMb8eTcX-xLV_cKwCXIWbE",
+  authDomain:"liveqso-diplomas.firebaseapp.com",
+  databaseURL:"https://liveqso-diplomas-default-rtdb.firebaseio.com",
+  projectId:"liveqso-diplomas",
+  storageBucket:"liveqso-diplomas.firebasestorage.app",
+  messagingSenderId:"807864210448",
+  appId:"1:807864210448:web:daa27562a82646c4606695"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+/* ===== BANNER FIREBASE ===== */
+db.ref("evento/banner").on("value",snap=>{
+  if(snap.exists()){
+    document.getElementById("eventBanner").style.backgroundImage =
+      `url(${snap.val()})`;
+  }
+});
+
+/* ===== RANKINGS ===== */
+function pintarLista(data,id){
+  const cont=document.getElementById(id);
+  cont.innerHTML="";
+  if(!data) return;
+
+  const arr=Object.values(data).sort((a,b)=>b.count-a.count).slice(0,100);
+  arr.forEach((x,i)=>{
+    const d=document.createElement("div");
+    if(i===0)d.classList.add("top1");
+    else if(i===1)d.classList.add("top2");
+    else if(i===2)d.classList.add("top3");
+    d.innerHTML=`<span>${i+1}</span><span>${x.call}</span><span>${x.count}</span>`;
+    cont.appendChild(d);
+  });
+}
+
+/* ===== STATS ===== */
+function actualizarStats(){
+  db.ref("ranking/general").once("value",s=>{
+    const d=s.val()||{};
+    let qsos=0;
+    const calls=new Set();
+    const pref=new Set();
+
+    Object.values(d).forEach(x=>{
+      qsos+=x.count;
+      calls.add(x.call);
+      const p=x.call.match(/^[^\d]+/);
+      if(p)pref.add(p[0]);
+    });
+
+    totalQsos.textContent=qsos;
+    totalCalls.textContent=calls.size;
+    totalPrefixes.textContent=pref.size;
+  });
+}
+
+/* ===== LISTENERS ===== */
+db.ref("ranking/general").on("value",s=>{
+  pintarLista(s.val(),"listGeneral");
+  actualizarStats();
+});
+db.ref("ranking/ssb").on("value",s=>pintarLista(s.val(),"listSSB"));
+db.ref("ranking/cw").on("value",s=>pintarLista(s.val(),"listCW"));
+db.ref("ranking/mgm").on("value",s=>pintarLista(s.val(),"listMGM"));
+</script>
+
+</body>
+</html>

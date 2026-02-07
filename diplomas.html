@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>EG7DA – Diplomas</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+
+body{
+  background:#f3f4f6 url('img/topillodx-logo.png') no-repeat bottom right;
+  background-size:60px;
+  min-height:100vh;
+  padding:20px;
+}
+
+/* ===== BANNER ===== */
+.banner{
+  width:100%;
+  height:240px;
+  background:#ddd center/cover no-repeat;
+  border-radius:16px;
+  margin-bottom:25px;
+  box-shadow:0 10px 25px rgba(0,0,0,.3);
+}
+
+/* ===== NAV ===== */
+nav{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+nav button{
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  font-size:1rem;
+  cursor:pointer;
+  font-weight:bold;
+  background:linear-gradient(135deg,#4ade80,#16a34a);
+  color:#fff;
+}
+
+/* ===== MINIATURAS ===== */
+.miniatura{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+.miniatura img{
+  width:180px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+
+/* ===== BUSCADOR ===== */
+.buscador{
+  text-align:center;
+  margin-bottom:20px;
+}
+.buscador input{
+  padding:10px;
+  font-size:1rem;
+  width:250px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin:5px;
+}
+.buscador button{
+  padding:10px 20px;
+  font-size:1rem;
+  border:none;
+  border-radius:8px;
+  background:#16a34a;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ===== QSOs ===== */
+.qso-list{
+  max-width:800px;
+  margin:20px auto;
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.qso-item{
+  display:flex;
+  justify-content:space-between;
+  padding:5px 0;
+  border-bottom:1px solid #eee;
+}
+.qso-item.header{
+  font-weight:bold;
+  border-bottom:2px solid #15803d;
+  margin-bottom:8px;
+}
+
+/* ===== BOTONES ===== */
+.botones-descarga{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin:30px auto;
+}
+.botones-descarga button{
+  padding:14px 35px;
+  font-size:1.1rem;
+  font-weight:bold;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  color:#fff;
+}
+.btn-png{background:#15803d;}
+.btn-pdf{background:#1e40af;}
+</style>
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner" id="eventBanner"></div>
+
+<!-- NAV -->
+<nav>
+  <button onclick="location.href='index.html'">INICIO</button>
+  <button onclick="location.href='bases.html'">BASES</button>
+  <button onclick="location.href='diplomas.html'">DIPLOMAS</button>
+  <button onclick="location.href='estadisticas.html'">RANKING</button>
+  <button onclick="location.href='admin.html'">ADMIN</button>
+</nav>
+
+<!-- MINIATURAS -->
+<div class="miniatura" id="miniaturaDiploma"></div>
+
+<!-- BUSCADOR -->
+<div class="buscador">
+  <input type="text" id="indicativo" placeholder="Introduce tu indicativo">
+  <input type="text" id="nombre" placeholder="Introduce tu nombre">
+  <br>
+  <button onclick="buscarQSOs()">Buscar QSOs</button>
+</div>
+
+<!-- LISTADO QSOs -->
+<div class="qso-list" id="qsoList"></div>
+
+<!-- DESCARGA -->
+<div class="botones-descarga">
+  <button class="btn-png" onclick="generarDiploma('png')">📸 Descargar PNG</button>
+  <button class="btn-pdf" onclick="generarDiploma('pdf')">🖨️ Descargar PDF</button>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyDuQKzyIl6nAqMb8eTcX-xLV_cKwCXIWbE",
+  authDomain:"liveqso-diplomas.firebaseapp.com",
+  databaseURL:"https://liveqso-diplomas-default-rtdb.firebaseio.com",
+  projectId:"liveqso-diplomas",
+  storageBucket:"liveqso-diplomas.firebasestorage.app",
+  messagingSenderId:"807864210448",
+  appId:"1:807864210448:web:daa27562a82646c4606695"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+/* ===== BANNER DESDE FIREBASE ===== */
+db.ref("evento/banner").on("value", snap=>{
+  if(snap.exists()){
+    document.getElementById("eventBanner").style.backgroundImage =
+      `url(${snap.val()})`;
+  }
+});
+
+/* ===== DIPLOMAS ===== */
+let diplomaBase="";
+let totalQSOs=0;
+let modosSet=new Set();
+
+function cargarMiniatura(){
+  db.ref("diplomas").once("value").then(s=>{
+    const d=s.val(); if(!d) return;
+    const arr=Object.values(d);
+    arr.slice(-5).forEach(x=>{
+      const i=document.createElement("img");
+      i.src=x.data;
+      miniaturaDiploma.appendChild(i);
+    });
+    diplomaBase=arr[arr.length-1].data;
+  });
+}
+
+function campoADIF(txt,c){
+  const r=new RegExp(`<${c}:\\d+>([^ <]+)`,"i");
+  const m=txt.match(r);
+  return m?m[1]:"";
+}
+
+function buscarQSOs(){
+  const call=indicativo.value.toUpperCase().trim();
+  const nom=nombre.value.trim();
+  if(!call||!nom){alert("Introduce indicativo y nombre");return;}
+
+  qsoList.innerHTML="";
+  totalQSOs=0;
+  modosSet.clear();
+
+  db.ref("qsos").once("value").then(s=>{
+    const h=document.createElement("div");
+    h.className="qso-item header";
+    h.innerHTML="<span>CALL</span><span>FECHA</span><span>HORA</span><span>BANDA</span><span>MODO</span>";
+    qsoList.appendChild(h);
+
+    s.forEach(c=>{
+      const l=c.val();
+      if(campoADIF(l,"CALL").toUpperCase()!==call)return;
+
+      totalQSOs++;
+      modosSet.add(campoADIF(l,"MODE"));
+
+      const f=campoADIF(l,"QSO_DATE");
+      const t=campoADIF(l,"TIME_ON");
+
+      const div=document.createElement("div");
+      div.className="qso-item";
+      div.innerHTML=`
+        <span>${campoADIF(l,"STATION_CALLSIGN")}</span>
+        <span>${f.substr(6,2)}/${f.substr(4,2)}/${f.substr(0,4)}</span>
+        <span>${t.substr(0,2)}:${t.substr(2,2)}</span>
+        <span>${campoADIF(l,"BAND")}</span>
+        <span>${campoADIF(l,"MODE")}</span>`;
+      qsoList.appendChild(div);
+    });
+  });
+}
+
+function generarDiploma(tipo){
+  if(!diplomaBase||totalQSOs===0){
+    alert("Busca QSOs primero");
+    return;
+  }
+
+  const canvas=document.createElement("canvas");
+  const ctx=canvas.getContext("2d");
+  const img=new Image();
+  img.crossOrigin="anonymous";
+
+  img.onload=()=>{
+    canvas.width=img.width;
+    canvas.height=img.height;
+    ctx.drawImage(img,0,0);
+
+    const cx=canvas.width/2;
+    ctx.textAlign="center";
+
+    const recY=canvas.height*0.37;
+    const salto=canvas.height*0.055;
+
+    ctx.font="bold 64px Playfair Display";
+    ctx.fillStyle="#0f172a";
+    ctx.fillText(indicativo.value.toUpperCase(),cx,recY);
+
+    ctx.font="bold 52px Playfair Display";
+    ctx.fillStyle="#1e293b";
+    ctx.fillText(nombre.value,cx,recY+salto);
+
+    const qsoY=canvas.height*0.68;
+    ctx.font="bold 40px Playfair Display";
+    ctx.fillStyle="#b91c1c";
+    ctx.fillText(`QSOs realizados: ${totalQSOs}`,cx,qsoY);
+
+    ctx.font="bold 28px Playfair Display";
+    ctx.fillStyle="#1e40af";
+    ctx.fillText(`Modos: ${[...modosSet].join(" · ")}`,cx,qsoY+40);
+
+    if(tipo==="png"){
+      const a=document.createElement("a");
+      a.download=`Diploma_${indicativo.value}.png`;
+      a.href=canvas.toDataURL("image/png");
+      a.click();
+    }else{
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
+      pdf.addImage(canvas.toDataURL("image/jpeg",1.0),"JPEG",0,0,297,210);
+      pdf.save(`Diploma_${indicativo.value}.pdf`);
+    }
+  };
+
+  img.src=diplomaBase;
+}
+
+cargarMiniatura();
+</script>
+
+</body>
+</html>
